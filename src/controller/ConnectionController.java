@@ -61,22 +61,20 @@ public class ConnectionController {
         }
     }
     
-    public void switchReadStatus() throws SerialPortException {
+    public void switchReadStatus(double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
         Integer passing;
         if (readStatus) {
             passing = 0;
+            con.writeData(passing.toString());
         } else {
-            passing = 1;
+            sendAllData(1,kp,ki,kd,setpoint,rotation);
         }
-        con.writeData(passing.toString());
         readStatus = !readStatus;
     }
     
-    public void modifyData() {
-        Integer passing;
+    public void modifyData(double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
         if (readStatus) {
-            passing = 0;
-            sendAllData();
+            sendAllData(2,kp,ki,kd,setpoint,rotation);
         }
     }
     
@@ -92,7 +90,12 @@ public class ConnectionController {
         return connectionStatus;
     }
     
-    private void sendAllData() {
-        
+    private void sendAllData(int stat, double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
+        con.writeData(Integer.toString(stat));
+        con.writeData(Double.toString(setpoint*10000).substring(0, 6));
+        con.writeData(Double.toString(kp*10000).substring(0, 6));
+        con.writeData(Double.toString(ki*10000).substring(0, 6));
+        con.writeData(Double.toString(kd*10000).substring(0, 6));
+        con.writeData(Integer.toString(rotation));
     }
 }

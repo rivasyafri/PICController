@@ -42,12 +42,15 @@ import org.jfree.data.xy.XYSeriesCollection;
  */
 public class Dashboard extends javax.swing.JFrame {
 
+    private double setPoint;
     private int currentTime = 0;
     private int counter = 0;
+    private int setRangeY = 0;
     private final ConnectionController cc;
     private Timer timer;
     private JFreeChart voltageLineChart;
     private XYSeries voltageSeries;
+    private XYSeries setPointSeries;
     private XYSeriesCollection voltageDataset;
     private XYPlot xyPlot;
     private int tickpoint = 50;
@@ -58,14 +61,18 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         cc = new ConnectionController();
         voltageSeries = new XYSeries("voltage");
+        setPointSeries = new XYSeries("setpoint");
         voltageSeries.add(currentTime, 0);
         currentTime++;
-        voltageDataset = new XYSeriesCollection(voltageSeries);
+        voltageDataset = new XYSeriesCollection();
+        voltageDataset.addSeries(voltageSeries);
+        voltageDataset.addSeries(setPointSeries);
         voltageLineChart = generateVoltageLineChart();
         initComponents();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
+        baudRate.setSelectedItem(baudRate.getItemAt(3));
     }
 
     /**
@@ -103,6 +110,8 @@ public class Dashboard extends javax.swing.JFrame {
         timedivSelection = new javax.swing.JComboBox();
         connectButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        yAxisRange = new javax.swing.JLabel();
+        yAxisRangeSelection = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("PIC Controller");
@@ -269,6 +278,15 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel2.setText("ms");
 
+        yAxisRange.setText("Y-Axis Range");
+
+        yAxisRangeSelection.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Auto", "0 - 5 V", "0 - 10 V", "0 - 15 V" }));
+        yAxisRangeSelection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                yAxisRangeSelectionActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout ConnectorPanelLayout = new javax.swing.GroupLayout(ConnectorPanel);
         ConnectorPanel.setLayout(ConnectorPanelLayout);
         ConnectorPanelLayout.setHorizontalGroup(
@@ -284,7 +302,12 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(baudRateLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(baudRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(timedivLabel))
+                    .addGroup(ConnectorPanelLayout.createSequentialGroup()
+                        .addComponent(yAxisRange)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(yAxisRangeSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(timedivLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(connectButton)
@@ -301,7 +324,10 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(timedivLabel)
                     .addComponent(timedivSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(jLabel2)
+                    .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(yAxisRange)
+                        .addComponent(yAxisRangeSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(baudRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -321,13 +347,13 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(ConnectorPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 818, Short.MAX_VALUE)
-                    .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 818, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 818, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(ControlPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 691, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 691, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(ConnectorPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -340,10 +366,12 @@ public class Dashboard extends javax.swing.JFrame {
             double data = cc.readData();
             if (counter == 10000) {
                 voltageSeries.remove(0);
+                setPointSeries.remove(0);
             } else if (counter < 10000) {
                 counter++;
             }
             voltageSeries.add(currentTime, data);
+            setPointSeries.add(currentTime, setPoint);
             currentTime++;
             xyPlot = (XYPlot) voltageLineChart.getPlot();
             xyPlot.setDomainCrosshairVisible(true);
@@ -351,6 +379,25 @@ public class Dashboard extends javax.swing.JFrame {
             NumberAxis domain = (NumberAxis) xyPlot.getDomainAxis();
             domain.setRange(voltageSeries.getItemCount()-(tickpoint*10), voltageSeries.getItemCount());
             domain.setTickUnit(new NumberTickUnit(tickpoint));
+            NumberAxis range = (NumberAxis) xyPlot.getRangeAxis();
+            switch(setRangeY) {
+                case 1 : 
+                    range.setRange(0, 5);
+                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                    break;
+                case 2 : 
+                    range.setRange(0, 10);
+                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                    break;
+                case 3 : 
+                    range.setRange(0, 15);
+                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                    break;
+                default : 
+                    range.setAutoRange(true);
+                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                    break;
+            }
         } else {
             timer.stop();
         }
@@ -361,6 +408,31 @@ public class Dashboard extends javax.swing.JFrame {
         setComponentsEnabled();
         setConnectionText();
         setStartText();
+    }
+    
+    private double getKI() {
+        return Double.parseDouble(KIField.getText());
+    }
+    
+    private double getKP() {
+        return Double.parseDouble(KPField.getText());
+    }
+    
+    private double getKD() {
+        return Double.parseDouble(KDField.getText());
+    }
+    
+    private double getSetPoint() {
+        setPoint = Double.parseDouble(setPointField.getText());
+        return setPoint;
+    }
+    
+    private int getRotation() {
+        if (((String) rotationSelection.getSelectedItem()).equals("CW")) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
     
     private JFreeChart generateVoltageLineChart() {
@@ -416,16 +488,26 @@ public class Dashboard extends javax.swing.JFrame {
                     KDField.getText().isEmpty() || setPointField.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(rootPane, "KP, KD, KI, or Setpoint is still empty", "ERROR", JOptionPane.ERROR_MESSAGE);
             } else {
-                if (cc.getReadStatus()) {
-                    timer.stop();
+                if (Double.parseDouble(KPField.getText()) > 100 || Double.parseDouble(KPField.getText()) < 0) {
+                    JOptionPane.showMessageDialog(rootPane, "KP has to be in 0 to 100", "ERROR", JOptionPane.ERROR_MESSAGE);
+                } else if (Double.parseDouble(KIField.getText()) > 100 || Double.parseDouble(KPField.getText()) < 0) {
+                    JOptionPane.showMessageDialog(rootPane, "KI has to be in 0 to 100", "ERROR", JOptionPane.ERROR_MESSAGE);
+                } else if (Double.parseDouble(KDField.getText()) > 100 || Double.parseDouble(KPField.getText()) < 0) {
+                    JOptionPane.showMessageDialog(rootPane, "KD has to be in 0 to 100", "ERROR", JOptionPane.ERROR_MESSAGE);
+                } else if (Double.parseDouble(setPointField.getText()) > 12 || Double.parseDouble(KPField.getText()) < 0) {
+                    JOptionPane.showMessageDialog(rootPane, "Setpoint has to be in 0 to 12", "ERROR", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    timer = new Timer(40, (ActionEvent e) -> {
-                        updateChart();
-                    });
-                    timer.start();
+                    if (cc.getReadStatus()) {
+                        timer.stop();
+                    } else {
+                        timer = new Timer(40, (ActionEvent e) -> {
+                            updateChart();
+                        });
+                        timer.start();
+                    }
+                    cc.switchReadStatus(getKP(), getKI(), getKD(), getSetPoint(), getRotation());
+                    setStartText();
                 }
-                cc.switchReadStatus();
-                setStartText();
             }
         } catch (SerialPortException ex) {
             Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
@@ -442,13 +524,27 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     private void modifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifyButtonActionPerformed
-        
+        try {    
+            if (KPField.getText().isEmpty() || KIField.getText().isEmpty() || 
+                    KDField.getText().isEmpty() || setPointField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(rootPane, "KP, KD, KI, or Setpoint is still empty", "ERROR", JOptionPane.ERROR_MESSAGE);
+            } else {
+                cc.modifyData(getKP(), getKI(), getKD(), getSetPoint(), getRotation());
+            }
+        } catch (SerialPortException ex) {
+            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_modifyButtonActionPerformed
 
     private void timedivSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timedivSelectionActionPerformed
         tickpoint = Integer.parseInt((String) timedivSelection.getSelectedItem());
     }//GEN-LAST:event_timedivSelectionActionPerformed
 
+    private void yAxisRangeSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_yAxisRangeSelectionActionPerformed
+        setRangeY = yAxisRangeSelection.getSelectedIndex();
+    }//GEN-LAST:event_yAxisRangeSelectionActionPerformed
+    
     public static void main(String args[]) {
         /* Set the Windows look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -501,5 +597,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton startButton;
     private javax.swing.JLabel timedivLabel;
     private javax.swing.JComboBox timedivSelection;
+    private javax.swing.JLabel yAxisRange;
+    private javax.swing.JComboBox yAxisRangeSelection;
     // End of variables declaration//GEN-END:variables
 }
