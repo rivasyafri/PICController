@@ -18,6 +18,7 @@ package model;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import jssc.SerialPortTimeoutException;
 
 /**
  * SerialConnection is a class to handle serial port used in this program
@@ -61,8 +62,8 @@ public class SerialConnection {
      * @throws SerialPortException exception if device selected is busy or not 
      * connected
      */
-    public String readData() throws SerialPortException {
-        String data = new String(serialPort.readBytes(5));
+    public String readData() throws SerialPortException, SerialPortTimeoutException {
+        String data = new String(serialPort.readBytes(5, 1000));
         String trim = data.trim();
         return trim;
     }

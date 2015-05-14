@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
+import jssc.SerialPortTimeoutException;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -109,9 +110,9 @@ public class Dashboard extends javax.swing.JFrame {
         timedivLabel = new javax.swing.JLabel();
         timedivSelection = new javax.swing.JComboBox();
         connectButton = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
         yAxisRange = new javax.swing.JLabel();
         yAxisRangeSelection = new javax.swing.JComboBox();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("PIC Controller");
@@ -123,19 +124,19 @@ public class Dashboard extends javax.swing.JFrame {
 
         KPLabel.setText("KP");
 
-        KPField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        KPField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
         KPField.setMinimumSize(new java.awt.Dimension(85, 20));
         KPField.setPreferredSize(new java.awt.Dimension(85, 20));
 
-        KIField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        KIField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
         KIField.setMinimumSize(new java.awt.Dimension(85, 20));
         KIField.setPreferredSize(new java.awt.Dimension(85, 20));
 
-        KDField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        KDField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
         KDField.setMinimumSize(new java.awt.Dimension(85, 20));
         KDField.setPreferredSize(new java.awt.Dimension(85, 20));
 
-        setPointField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        setPointField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
         setPointField.setMinimumSize(new java.awt.Dimension(85, 20));
         setPointField.setPreferredSize(new java.awt.Dimension(85, 20));
 
@@ -276,8 +277,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jLabel2.setText("ms");
-
         yAxisRange.setText("Y-Axis Range");
 
         yAxisRangeSelection.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Auto", "0 - 5 V", "0 - 10 V", "0 - 15 V" }));
@@ -287,54 +286,55 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        jLabel3.setText("Update Rate = 50ms");
+
         javax.swing.GroupLayout ConnectorPanelLayout = new javax.swing.GroupLayout(ConnectorPanel);
         ConnectorPanel.setLayout(ConnectorPanelLayout);
         ConnectorPanelLayout.setHorizontalGroup(
             ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ConnectorPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(ConnectorPanelLayout.createSequentialGroup()
-                        .addComponent(portNameLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(portName, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(baudRateLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(baudRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(portNameLabel))
                     .addGroup(ConnectorPanelLayout.createSequentialGroup()
-                        .addComponent(yAxisRange)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(yAxisRangeSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(timedivLabel)))
+                        .addGap(470, 470, 470)
+                        .addComponent(yAxisRange)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(yAxisRangeSelection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(portName, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(connectButton)
-                    .addGroup(ConnectorPanelLayout.createSequentialGroup()
-                        .addComponent(timedivSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)))
-                .addContainerGap())
+                    .addComponent(timedivLabel)
+                    .addComponent(baudRateLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(baudRate, 0, 67, Short.MAX_VALUE)
+                    .addComponent(timedivSelection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(connectButton)
+                .addGap(26, 26, 26))
         );
         ConnectorPanelLayout.setVerticalGroup(
             ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ConnectorPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(yAxisRange)
+                    .addComponent(yAxisRangeSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(timedivLabel)
-                    .addComponent(timedivSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(yAxisRange)
-                        .addComponent(yAxisRangeSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(timedivSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(ConnectorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(baudRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(portName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(baudRateLabel)
                     .addComponent(portNameLabel)
-                    .addComponent(connectButton))
+                    .addComponent(connectButton)
+                    .addComponent(jLabel3))
                 .addContainerGap())
         );
 
@@ -346,8 +346,8 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(ControlPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ConnectorPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 818, Short.MAX_VALUE)
-                    .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 818, Short.MAX_VALUE)))
+                    .addComponent(ConnectorPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 838, Short.MAX_VALUE)
+                    .addComponent(chartPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -363,40 +363,47 @@ public class Dashboard extends javax.swing.JFrame {
 
     public void updateChart() {
         if (cc.getConnectionStatus()) {
-            double data = cc.readData();
-            if (counter == 10000) {
-                voltageSeries.remove(0);
-                setPointSeries.remove(0);
-            } else if (counter < 10000) {
-                counter++;
-            }
-            voltageSeries.add(currentTime, data);
-            setPointSeries.add(currentTime, setPoint);
-            currentTime++;
-            xyPlot = (XYPlot) voltageLineChart.getPlot();
-            xyPlot.setDomainCrosshairVisible(true);
-            xyPlot.setRangeCrosshairVisible(true);
-            NumberAxis domain = (NumberAxis) xyPlot.getDomainAxis();
-            domain.setRange(voltageSeries.getItemCount()-(tickpoint*10), voltageSeries.getItemCount());
-            domain.setTickUnit(new NumberTickUnit(tickpoint));
-            NumberAxis range = (NumberAxis) xyPlot.getRangeAxis();
-            switch(setRangeY) {
-                case 1 : 
-                    range.setRange(0, 5);
-                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-                    break;
-                case 2 : 
-                    range.setRange(0, 10);
-                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-                    break;
-                case 3 : 
-                    range.setRange(0, 15);
-                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-                    break;
-                default : 
-                    range.setAutoRange(true);
-                    range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-                    break;
+            try {
+                double data = cc.readData();
+                if (counter == 1000) {
+                    voltageSeries.remove(0);
+                    setPointSeries.remove(0);
+                } else if (counter < 1000) {
+                    counter++;
+                }
+                voltageSeries.add(currentTime*50, data);
+                setPointSeries.add(currentTime*50, setPoint);
+                xyPlot = (XYPlot) voltageLineChart.getPlot();
+                xyPlot.setDomainCrosshairVisible(true);
+                xyPlot.setRangeCrosshairVisible(true);
+                NumberAxis domain = (NumberAxis) xyPlot.getDomainAxis();
+                domain.setRange(currentTime*50 - tickpoint*10, currentTime*50);
+                System.out.println(voltageSeries.getItemCount());
+                domain.setTickUnit(new NumberTickUnit(tickpoint));
+                currentTime++;
+                NumberAxis range = (NumberAxis) xyPlot.getRangeAxis();
+                switch(setRangeY) {
+                    case 1 :
+                        range.setRange(0, 5);
+                        range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                        break;
+                    case 2 :
+                        range.setRange(0, 10);
+                        range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                        break;
+                    case 3 :
+                        range.setRange(0, 15);
+                        range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                        break;
+                    default :
+                        range.setAutoRange(true);
+                        range.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                        break;
+                }
+            } catch (SerialPortTimeoutException ex) {
+                timer.stop();
+                cc.setConnectionStatus(false);
+                cc.setReadStatus(false);
             }
         } else {
             timer.stop();
@@ -456,6 +463,13 @@ public class Dashboard extends javax.swing.JFrame {
         modifyButton.setEnabled(cc.getReadStatus());
     }
     
+    private void resetData() {
+        setPointSeries.clear();
+        voltageSeries.clear();
+        currentTime = 0;
+        counter = 0;
+    }
+    
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
         try {    
             if (cc.getConnectionStatus()) {
@@ -464,8 +478,14 @@ public class Dashboard extends javax.swing.JFrame {
                 connectButton.setText("Connect");
                 setComponentsEnabled();
             } else {
+                resetData();
                 cc.connect((String) portName.getSelectedItem(), Integer.parseInt((String) baudRate.getSelectedItem()));
                 connectButton.setText("Disconnect");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 setComponentsEnabled();
             }
         } catch (SerialPortException ex) {
@@ -484,29 +504,31 @@ public class Dashboard extends javax.swing.JFrame {
     
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         try {    
-            if (KPField.getText().isEmpty() || KIField.getText().isEmpty() || 
-                    KDField.getText().isEmpty() || setPointField.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(rootPane, "KP, KD, KI, or Setpoint is still empty", "ERROR", JOptionPane.ERROR_MESSAGE);
+            if (cc.getReadStatus()) {
+                timer.stop();
+                cc.stopReading();
+                setStartText();
             } else {
-                if (Double.parseDouble(KPField.getText()) > 100 || Double.parseDouble(KPField.getText()) < 0) {
-                    JOptionPane.showMessageDialog(rootPane, "KP has to be in 0 to 100", "ERROR", JOptionPane.ERROR_MESSAGE);
-                } else if (Double.parseDouble(KIField.getText()) > 100 || Double.parseDouble(KPField.getText()) < 0) {
-                    JOptionPane.showMessageDialog(rootPane, "KI has to be in 0 to 100", "ERROR", JOptionPane.ERROR_MESSAGE);
-                } else if (Double.parseDouble(KDField.getText()) > 100 || Double.parseDouble(KPField.getText()) < 0) {
-                    JOptionPane.showMessageDialog(rootPane, "KD has to be in 0 to 100", "ERROR", JOptionPane.ERROR_MESSAGE);
-                } else if (Double.parseDouble(setPointField.getText()) > 12 || Double.parseDouble(KPField.getText()) < 0) {
-                    JOptionPane.showMessageDialog(rootPane, "Setpoint has to be in 0 to 12", "ERROR", JOptionPane.ERROR_MESSAGE);
+                if (KPField.getText().isEmpty() || KIField.getText().isEmpty() || 
+                        KDField.getText().isEmpty() || setPointField.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(rootPane, "KP, KD, KI, or Setpoint is still empty", "ERROR", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    if (cc.getReadStatus()) {
-                        timer.stop();
+                    if (Double.parseDouble(KPField.getText()) > 50 || Double.parseDouble(KPField.getText()) < 0) {
+                        JOptionPane.showMessageDialog(rootPane, "KP has to be in 0 to 50", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    } else if (Double.parseDouble(KIField.getText()) > 50 || Double.parseDouble(KIField.getText()) < 0) {
+                        JOptionPane.showMessageDialog(rootPane, "KI has to be in 0 to 50", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    } else if (Double.parseDouble(KDField.getText()) > 50 || Double.parseDouble(KDField.getText()) < 0) {
+                        JOptionPane.showMessageDialog(rootPane, "KD has to be in 0 to 50", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    } else if (Double.parseDouble(setPointField.getText()) > 12 || Double.parseDouble(setPointField.getText()) <= 0) {
+                        JOptionPane.showMessageDialog(rootPane, "Setpoint has to be between 0 to 12", "ERROR", JOptionPane.ERROR_MESSAGE);
                     } else {
                         timer = new Timer(40, (ActionEvent e) -> {
                             updateChart();
                         });
                         timer.start();
+                        cc.startReading(getKP(), getKI(), getKD(), getSetPoint(), getRotation());
+                        setStartText();
                     }
-                    cc.switchReadStatus(getKP(), getKI(), getKD(), getSetPoint(), getRotation());
-                    setStartText();
                 }
             }
         } catch (SerialPortException ex) {
@@ -545,33 +567,6 @@ public class Dashboard extends javax.swing.JFrame {
         setRangeY = yAxisRangeSelection.getSelectedIndex();
     }//GEN-LAST:event_yAxisRangeSelectionActionPerformed
     
-    public static void main(String args[]) {
-        /* Set the Windows look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Windows".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        java.awt.EventQueue.invokeLater(() -> {
-            Dashboard d = new Dashboard();
-            d.setVisible(true);
-            Timer timer = new Timer(1000, (ActionEvent e) -> {
-                d.updateDashboard();
-            });
-            timer.start();
-        });
-    }
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel ConnectorPanel;
     private javax.swing.JPanel ControlPanel;
@@ -586,7 +581,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel chartPanel;
     private javax.swing.JButton connectButton;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JButton modifyButton;
     private javax.swing.JComboBox portName;
     private javax.swing.JLabel portNameLabel;

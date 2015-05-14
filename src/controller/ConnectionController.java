@@ -18,6 +18,7 @@ package controller;
 
 import javax.swing.Timer;
 import jssc.SerialPortException;
+import jssc.SerialPortTimeoutException;
 import model.SerialConnection;
 
 /**
@@ -44,32 +45,32 @@ public class ConnectionController {
         connectionStatus = false;
     }
     
-    public double readData() {
+    public double readData() throws SerialPortTimeoutException {
         try {
             String rawdata = con.readData();
             Double data;
             if (rawdata == null || rawdata.isEmpty()) {
                 data = (double) 0;
                 readStatus = false;
+                connectionStatus = false;
             } else {
                 data = Double.valueOf(rawdata);
             }
-            return data;
+            return data/1000;
         } catch (SerialPortException ex) {
             System.out.println(ex);
             return 0;
         }
     }
     
-    public void switchReadStatus(double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
-        Integer passing;
-        if (readStatus) {
-            passing = 0;
-            con.writeData(passing.toString());
-        } else {
-            sendAllData(1,kp,ki,kd,setpoint,rotation);
-        }
-        readStatus = !readStatus;
+    public void startReading(double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
+        sendAllData(1,kp,ki,kd,setpoint,rotation);
+        readStatus = true;
+    }
+    
+    public void stopReading() throws SerialPortException {
+        con.writeData(new Integer(0).toString());
+        readStatus = false;
     }
     
     public void modifyData(double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
@@ -86,16 +87,31 @@ public class ConnectionController {
         return readStatus;
     }
     
+    public void setConnectionStatus(boolean status) {
+        connectionStatus = status;
+    }
+    
     public boolean getConnectionStatus() {
         return connectionStatus;
     }
     
     private void sendAllData(int stat, double kp, double ki, double kd, double setpoint, int rotation) throws SerialPortException {
-        con.writeData(Integer.toString(stat));
-        con.writeData(Double.toString(setpoint*10000).substring(0, 6));
-        con.writeData(Double.toString(kp*10000).substring(0, 6));
-        con.writeData(Double.toString(ki*10000).substring(0, 6));
-        con.writeData(Double.toString(kd*10000).substring(0, 6));
+        con.writeData(Integer.toString(stat));    
+        con.writeData(convertData(setpoint));
+        con.writeData(convertData(kp));
+        con.writeData(convertData(ki));
+        con.writeData(convertData(kd));
         con.writeData(Integer.toString(rotation));
+    }
+    
+    private String convertData(double data) {
+        String stringdata = Integer.toString((int) (data*1000));
+        while (stringdata.length() < 5) {
+            stringdata = "0"+stringdata;
+        }
+        if (stringdata.length() > 5) {
+            stringdata = stringdata.substring(0, 5);
+        }
+        return stringdata;    
     }
 }
